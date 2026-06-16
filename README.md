@@ -1,5 +1,7 @@
 # BigQuery Release Radar 🛰️
 
+🔗 **Live Production URL**: [https://bq-release-radar-541820121652.us-central1.run.app](https://bq-release-radar-541820121652.us-central1.run.app)
+
 BigQuery Release Radar is a premium, real-time web application built with **Python Flask** and **Vanilla HTML/CSS/JavaScript**. It fetches, structures, and parses Google Cloud BigQuery release notes from the official Atom feed, allowing users to search, filter, and compose/share tweets about updates instantly.
 
 ---
