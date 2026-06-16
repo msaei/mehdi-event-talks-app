@@ -44,6 +44,105 @@
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Light Theme Variables & Styles */
+body.light-theme {
+    --color-bg-base: #f0f4f8;
+    --color-bg-surface: rgba(255, 255, 255, 0.7);
+    --color-bg-surface-hover: rgba(255, 255, 255, 0.85);
+    --color-bg-surface-active: rgba(255, 255, 255, 0.95);
+    
+    --color-primary-glow: rgba(14, 165, 233, 0.06);
+    --color-primary-border: rgba(14, 165, 233, 0.2);
+    
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+}
+
+body.light-theme .bg-gradient {
+    background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f0f4f8 70%);
+}
+
+body.light-theme .bg-glow {
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0) 70%);
+}
+
+/* Theme Toggle Button Icons */
+.theme-toggle-btn .icon-sun {
+    display: none;
+}
+.theme-toggle-btn .icon-moon {
+    display: inline-block;
+}
+body.light-theme .theme-toggle-btn .icon-sun {
+    display: inline-block;
+}
+body.light-theme .theme-toggle-btn .icon-moon {
+    display: none;
+}
+
+/* Light mode component accessibility overrides */
+body.light-theme .btn-secondary {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--color-text-primary);
+}
+body.light-theme .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .btn-tweet {
+    background: #0f172a;
+    color: #ffffff;
+}
+body.light-theme .btn-tweet:hover {
+    background: #1e293b;
+}
+
+body.light-theme .search-box input {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+body.light-theme .search-box input:focus {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(14, 165, 233, 0.35);
+}
+
+body.light-theme .card-content {
+    color: #1e293b;
+}
+body.light-theme .card-content code {
+    background: rgba(0, 0, 0, 0.05);
+    color: #0f172a;
+}
+
+body.light-theme .composer-selected-summary {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .tweet-textarea {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .hashtag-checkbox span {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+body.light-theme .hashtag-checkbox input:checked + span {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: rgba(14, 165, 233, 0.35);
+    color: #0284c7;
+}
+
+body.light-theme .toast {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
 * {
     box-sizing: border-box;
     margin: 0;

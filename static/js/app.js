@@ -9,6 +9,7 @@ const elements = {
     btnRefresh: document.getElementById('btn-refresh'),
     btnRefreshText: document.getElementById('btn-refresh-text'),
     btnExport: document.getElementById('btn-export'),
+    btnThemeToggle: document.getElementById('btn-theme-toggle'),
     iconSync: document.querySelector('.icon-sync'),
     txtLastSynced: document.getElementById('txt-last-synced'),
     releasesList: document.getElementById('releases-list'),
@@ -48,8 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
+    // Initialize Theme
+    initTheme();
+
     // Fetch initial data
     fetchReleases();
+
+    // Theme toggle event
+    elements.btnThemeToggle.addEventListener('click', () => {
+        toggleTheme();
+    });
 
     // Refresh button event
     elements.btnRefresh.addEventListener('click', () => {
@@ -596,4 +605,26 @@ function exportToCSV() {
     document.body.removeChild(link);
     
     showToast("CSV Exported successfully!");
+}
+
+// Initialize theme from localStorage or system preference
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+    } else if (savedTheme === 'dark') {
+        document.body.classList.remove('light-theme');
+    } else {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (prefersLight) {
+            document.body.classList.add('light-theme');
+        }
+    }
+}
+
+// Toggle light/dark theme class on body and save in localStorage
+function toggleTheme() {
+    const isLightTheme = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+    showToast(`Switched to ${isLightTheme ? 'Light' : 'Dark'} mode!`);
 }
