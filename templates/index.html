@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Radar | Live GCP Updates</title>
+    <meta name="description" content="Stay updated with the latest Google Cloud BigQuery release notes, features, issues, and deprecations. Select and share updates instantly.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="bg-glow"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo-container">
+                <span class="logo-badge">Live Radar</span>
+                <h1 id="app-title">BigQuery Release Radar</h1>
+                <p id="app-subtitle">Track, filter, and share Google Cloud BigQuery updates as they happen.</p>
+            </div>
+            
+            <div class="header-actions">
+                <div class="sync-status" id="sync-status-container">
+                    <span class="status-indicator"></span>
+                    <span id="txt-last-synced">Syncing...</span>
+                </div>
+                <button id="btn-refresh" class="btn-primary" aria-label="Refresh release notes">
+                    <svg class="icon icon-sync" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span id="btn-refresh-text">Refresh Feed</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- STATS DASHBOARD -->
+        <section class="stats-grid" aria-label="Statistics Dashboard">
+            <div class="stat-card active-filter" data-filter="All" id="stat-all" role="button" tabindex="0">
+                <div class="stat-icon-wrapper all-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="val-total">-</span>
+                    <span class="stat-label">Total Updates</span>
+                </div>
+            </div>
+
+            <div class="stat-card" data-filter="Feature" id="stat-features" role="button" tabindex="0">
+                <div class="stat-icon-wrapper feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="val-features">-</span>
+                    <span class="stat-label">Features</span>
+                </div>
+            </div>
+
+            <div class="stat-card" data-filter="Issue" id="stat-issues" role="button" tabindex="0">
+                <div class="stat-icon-wrapper issue-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="val-issues">-</span>
+                    <span class="stat-label">Issues</span>
+                </div>
+            </div>
+
+            <div class="stat-card" data-filter="Deprecation" id="stat-deprecations" role="button" tabindex="0">
+                <div class="stat-icon-wrapper deprecation-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="val-deprecations">-</span>
+                    <span class="stat-label">Deprecations</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTERS & SEARCH -->
+        <div class="filter-bar">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="input-search" placeholder="Search releases by keyword (e.g. Gemini, SQL, ObjectRef)..." aria-label="Search release notes">
+                <button id="btn-clear-search" class="btn-clear" aria-label="Clear search">✕</button>
+            </div>
+            
+            <div class="filter-pills" id="filter-pills-container" role="tablist" aria-label="Filter updates by type">
+                <button class="filter-pill active" data-type="All" role="tab" aria-selected="true" id="tab-all">All Updates</button>
+                <button class="filter-pill" data-type="Feature" role="tab" aria-selected="false" id="tab-feature">Features</button>
+                <button class="filter-pill" data-type="Issue" role="tab" aria-selected="false" id="tab-issue">Issues</button>
+                <button class="filter-pill" data-type="Deprecation" role="tab" aria-selected="false" id="tab-deprecation">Deprecations</button>
+                <button class="filter-pill" data-type="Others" role="tab" aria-selected="false" id="tab-others">Others</button>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <main class="content-layout">
+            <!-- LEFT COLUMN: RELEASES LIST -->
+            <section class="releases-section" aria-label="List of Release Notes">
+                <div class="section-header">
+                    <h2 id="releases-list-title">Updates Feed</h2>
+                    <span class="results-count" id="txt-results-count">Showing - updates</span>
+                </div>
+
+                <div id="releases-list" class="releases-list">
+                    <!-- Cards will be injected by JavaScript -->
+                    <div class="loading-state">
+                        <div class="spinner-large"></div>
+                        <p>Loading the latest release notes...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: TWITTER PREVIEW PANEL (STICKY) -->
+            <aside class="share-panel-container">
+                <div class="share-panel" id="share-panel">
+                    <h2 class="share-panel-title">
+                        <svg class="icon-twitter-x" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        Tweet Composer
+                    </h2>
+
+                    <!-- Empty State when nothing is selected -->
+                    <div id="share-empty-state" class="share-empty-state">
+                        <div class="composer-art">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="empty-title">No Update Selected</p>
+                        <p class="empty-desc">Click on any release card in the feed to customize and tweet about it.</p>
+                    </div>
+
+                    <!-- Composer Form when an update is selected -->
+                    <div id="share-composer" class="share-composer hidden">
+                        <div class="composer-selected-summary">
+                            <div class="summary-top">
+                                <span class="badge" id="composer-badge">Feature</span>
+                                <span class="date" id="composer-date">June 15, 2026</span>
+                            </div>
+                            <p class="summary-text" id="composer-snippet">Selecting an update...</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tweet-textarea" class="form-label">Customize Tweet Draft:</label>
+                            <textarea id="tweet-textarea" class="tweet-textarea" rows="5" maxlength="280" placeholder="Draft your tweet..."></textarea>
+                            <div class="form-helper">
+                                <span class="char-count-container">
+                                    <span id="char-count">0</span>/280
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Hashtag Options -->
+                        <div class="form-group">
+                            <label class="form-label">Add Hashtags:</label>
+                            <div class="hashtag-selector">
+                                <label class="hashtag-checkbox">
+                                    <input type="checkbox" value="#BigQuery" checked>
+                                    <span>#BigQuery</span>
+                                </label>
+                                <label class="hashtag-checkbox">
+                                    <input type="checkbox" value="#GoogleCloud" checked>
+                                    <span>#GoogleCloud</span>
+                                </label>
+                                <label class="hashtag-checkbox">
+                                    <input type="checkbox" value="#GCP">
+                                    <span>#GCP</span>
+                                </label>
+                                <label class="hashtag-checkbox">
+                                    <input type="checkbox" value="#DataAnalytics">
+                                    <span>#DataAnalytics</span>
+                                </label>
+                                <label class="hashtag-checkbox">
+                                    <input type="checkbox" value="#GenAI">
+                                    <span>#GenAI</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Share Actions -->
+                        <div class="composer-actions">
+                            <button id="btn-copy-tweet" class="btn-secondary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span>Copy Text</span>
+                            </button>
+                            <a id="btn-tweet" class="btn-tweet" target="_blank" rel="noopener noreferrer">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                                <span>Post to X</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden" role="alert">
+        <span id="toast-message">Copied!</span>
+    </div>
+
+    <!-- JavaScript script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
