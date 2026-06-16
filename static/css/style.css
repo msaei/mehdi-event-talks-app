@@ -563,13 +563,43 @@ body {
     border: 1px solid var(--color-other-border);
 }
 
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-card-action {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.btn-card-action:hover {
+    color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .card-link {
     color: var(--color-text-muted);
     transition: var(--transition-smooth);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
 
 .card-link:hover {
     color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Card content HTML styled */

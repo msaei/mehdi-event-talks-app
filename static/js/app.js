@@ -8,6 +8,7 @@ let searchQuery = '';
 const elements = {
     btnRefresh: document.getElementById('btn-refresh'),
     btnRefreshText: document.getElementById('btn-refresh-text'),
+    btnExport: document.getElementById('btn-export'),
     iconSync: document.querySelector('.icon-sync'),
     txtLastSynced: document.getElementById('txt-last-synced'),
     releasesList: document.getElementById('releases-list'),
@@ -53,6 +54,11 @@ function initApp() {
     // Refresh button event
     elements.btnRefresh.addEventListener('click', () => {
         fetchReleases(true);
+    });
+
+    // Export CSV button event
+    elements.btnExport.addEventListener('click', () => {
+        exportToCSV();
     });
 
     // Search events
@@ -272,13 +278,21 @@ function renderReleases() {
                     </span>
                     <span class="badge ${badgeClass}">${item.type}</span>
                 </div>
-                <a href="${item.link}" target="_blank" class="card-link" title="Open official release note" aria-label="Open official release note link">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                </a>
+                <div class="card-actions">
+                    <button class="btn-card-action btn-copy-card" title="Copy update to clipboard" aria-label="Copy update to clipboard">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                    <a href="${item.link}" target="_blank" class="card-link" title="Open official release note" aria-label="Open official release note link">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
             </div>
             <div class="card-content">
                 ${item.content}
@@ -290,6 +304,22 @@ function renderReleases() {
             </div>
         `;
         
+        // Copy event
+        const copyBtn = card.querySelector('.btn-copy-card');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering selection
+                const plainText = stripHtml(item.content);
+                const shareText = `BigQuery ${item.type} (${item.date}):\n${plainText}\n\nInfo: ${item.link}`;
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast("Copied update to clipboard!");
+                }).catch(err => {
+                    console.error("Failed to copy update:", err);
+                    showToast("Failed to copy update.");
+                });
+            });
+        }
+
         // Select event
         card.addEventListener('click', () => {
             selectRelease(item);
@@ -510,3 +540,60 @@ window.resetFilters = function() {
     toggleClearSearchButton();
     setActiveFilter('All');
 };
+
+// Export visible release notes to CSV
+function exportToCSV() {
+    // Get currently filtered list
+    const filteredList = releasesData.filter(item => {
+        const matchesFilter = (currentFilter === 'All') ||
+            (currentFilter === 'Others' && !['Feature', 'Issue', 'Deprecation'].includes(item.type)) ||
+            (item.type === currentFilter);
+            
+        const plainTextContent = stripHtml(item.content).toLowerCase();
+        const matchesSearch = !searchQuery || 
+            item.date.toLowerCase().includes(searchQuery) ||
+            item.type.toLowerCase().includes(searchQuery) ||
+            plainTextContent.includes(searchQuery);
+
+        return matchesFilter && matchesSearch;
+    });
+
+    if (filteredList.length === 0) {
+        showToast("No updates to export!");
+        return;
+    }
+
+    const headers = ["ID", "Date", "Type", "Link", "Content"];
+    const csvRows = [
+        headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",")
+    ];
+
+    filteredList.forEach(item => {
+        const plainText = stripHtml(item.content).replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+        const row = [
+            item.id,
+            item.date,
+            item.type,
+            item.link,
+            plainText
+        ];
+        csvRows.push(row.map(field => `"${field.replace(/"/g, '""')}"`).join(","));
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    const filterSuffix = currentFilter !== 'All' ? `_${currentFilter.toLowerCase()}` : '';
+    const dateStr = new Date().toISOString().split('T')[0];
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_releases_${dateStr}${filterSuffix}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast("CSV Exported successfully!");
+}
